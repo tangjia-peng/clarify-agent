@@ -17,6 +17,8 @@ node_modules/
 result/对话记录/
 result/裁判输出/
 result/*.xlsx
+!result/攻略Agent评估成绩单.xlsx
+~$*.xlsx
 data/travel_collection/candidates_*.json
 data/travel_collection/collection_report_*.json
 data/travel_collection/review_records_*.json
