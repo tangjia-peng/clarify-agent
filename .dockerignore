@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+.venv
+.uv-cache
+.npm-cache
+.web-workspaces
+.vscode
+.codex
+.agents
+tests
+demo
+node_modules
+**/__pycache__
+**/*.pyc

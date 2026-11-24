@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf2e9">
+  <title>进入 Mellow</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=mellow-cloud-1">
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:28px;background:#faf2e9;color:#3f302b;font:15px/1.8 "Segoe UI","Microsoft YaHei",sans-serif}.entry{width:min(100%,840px);display:grid;grid-template-columns:1fr 1fr;overflow:hidden;background:#fffdf8;border:1px solid #e7d8cc;border-radius:22px}.garden{display:flex;flex-direction:column;justify-content:center;gap:24px;padding:34px;background:#f7e8d4}.garden img{display:block;width:100%;height:auto;border-radius:12px}.garden p{margin:0;color:#7c6555;font-size:13px}.form-panel{padding:42px 34px}.brand{margin:0 0 34px;font:600 30px Georgia,serif;color:#b4573d}h1{margin:0 0 10px;font:28px/1.5 Georgia,"SimSun",serif;font-weight:400}.intro{margin:0 0 24px;color:#786860;font-size:14px}label{display:block;margin-bottom:8px;font-size:13px}input{width:100%;padding:12px;border:1px solid #dcc7b7;border-radius:9px;background:#fffaf3;color:inherit;font:inherit}input:focus{outline:2px solid #c27b5d;outline-offset:2px}button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:9px;background:#b4573d;color:#fffdf8;font:inherit;cursor:pointer}button:hover{background:#9e4d34}.login-error{padding:10px 12px;border-radius:8px;background:#faebe4;color:#a24639;font-size:13px}.hint{margin-top:24px;color:#786860;font-size:12px}@media(max-width:620px){body{padding:18px}.entry{grid-template-columns:1fr}.garden{padding:22px 28px;gap:10px}.garden img{max-height:145px;object-fit:contain}.garden p{display:none}.form-panel{padding:26px}.brand{margin-bottom:20px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <main class="entry">
+    <section class="garden" aria-label="午后海边小景">
+      <img src="/static/assets/mellow-scene.svg?v=mellow-cloud-1" width="960" height="400" alt="有人散步、阅读的海边小岛">
+      <p>给灵感一点阳光，<br>也给自己一点时间。</p>
+    </section>
+    <section class="form-panel">
+      <p class="brand">☀ Mellow</p>
+      <h1>你的想法，欢迎来坐坐。</h1>
+      <p class="intro">输入邀请人提供的访问口令，打开工作空间。</p>
+      <!-- LOGIN_ERROR -->
+      <form method="post" action="/auth/login">
+        <label for="password">访问口令</label>
+        <input id="password" name="password" type="password" required maxlength="256" autocomplete="current-password" autofocus>
+        <button type="submit">进入工作空间 ↗</button>
+      </form>
+      <p class="hint">请在当前登录中下载需要保留的文件。退出登录或服务重启后，需要重新进入。</p>
+    </section>
+  </main>
+</body>
+</html>

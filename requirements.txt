@@ -1,0 +1,9 @@
+openai>=1.60,<3
+mcp>=1.20,<2
+httpx>=0.27,<1
+python-dotenv>=1.0,<2
+# 本地网页服务与 WebSocket 通信
+starlette>=0.40,<2
+uvicorn>=0.30,<1
+wsproto>=1.2,<2
+anyio>=4.5,<5

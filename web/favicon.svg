@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>Mellow</title>
+  <rect width="32" height="32" rx="10" fill="#f9e7d0"/>
+  <circle cx="16" cy="14" r="7" fill="#c46c49"/>
+  <path d="M16 3v2M5 14h2m18 0h2M8 6l2 2m12 0 2-2" stroke="#c46c49" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M3 26c5-9 11-10 18-1l8 4H3Z" fill="#9aaa8b"/>
+  <path d="M10 29c8-7 13-7 19-3v3Z" fill="#d9ad85"/>
+</svg>

@@ -1,0 +1,15 @@
+services:
+  mellow:
+    build: .
+    ports:
+      - "127.0.0.1:8765:8765"
+    env_file: .env
+    environment:
+      WEB_PUBLIC_URL: ${WEB_PUBLIC_URL:-http://localhost:8765}
+      WEB_ACCESS_PASSWORD: ${WEB_ACCESS_PASSWORD:?请先在 .env 设置至少 12 位的 WEB_ACCESS_PASSWORD}
+      WEB_MAX_CONNECTIONS: "2"
+    volumes:
+      - mellow-data:/data
+    restart: unless-stopped
+volumes:
+  mellow-data:

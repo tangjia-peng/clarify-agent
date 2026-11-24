@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN" data-ui-loading>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Mellow，一个让想法慢慢成形的温暖工作空间。">
+  <meta name="theme-color" content="#faf2e9">
+  <title>Mellow · 让想法慢慢成形</title>
+  <link id="studio-favicon" rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <!-- 加载提示独立于外部 CSS，资源缺失时也不会显示错乱的裸页。 -->
+  <style>
+    html[data-ui-loading] { background: #faf2e9; }
+    html[data-ui-loading] body { margin: 0; height: auto; min-height: 100vh; overflow: auto; }
+    html[data-ui-loading] .studio-shell { position: fixed; inset: 0; visibility: hidden; }
+    html[data-ui-loading] .skip-link { display: none; }
+    #page-load-state { box-sizing: border-box; width: min(440px, calc(100% - 40px)); margin: 18vh auto 0; padding: 28px; border: 1px solid #eadccf; border-radius: 16px; background: #fffdf8; color: #3f302b; font: 15px/1.8 "Segoe UI", "Microsoft YaHei", sans-serif; overflow-wrap: anywhere; }
+    #page-load-state[hidden] { display: none; }
+    #page-load-title { margin: 0 0 8px; font-size: 20px; }
+    #page-load-detail { margin: 0 0 16px; color: #7c6b61; }
+    #page-load-state a, #page-load-state button { display: inline-block; box-sizing: border-box; margin: 5px 10px 0 0; padding: 7px 12px; border: 1px solid #b96548; border-radius: 8px; background: #b96548; color: #fffdf8; font: inherit; text-decoration: none; cursor: pointer; }
+    #page-load-state [hidden] { display: none; }
+  </style>
+  <script>
+    (() => {
+      const version = 'mellow-doodle-20261115-2';
+      const adjacent = new URL('./', location.href);
+      const served = new URL('/static/', location.href);
+      // 服务入口使用 /static；文件直开或目录预览优先使用同目录资源。
+      const roots = location.protocol === 'file:' || location.pathname !== '/'
+        ? [adjacent, served] : [served, adjacent];
+      const bases = [...new Set(roots.map((url) => url.href))];
+      document.getElementById('studio-favicon').href = new URL('favicon.svg?v=' + version, bases[0]).href;
+
+      function loadAsset(kind, filename) {
+        return new Promise((resolve, reject) => {
+          function attempt(index) {
+            if (index === bases.length) {
+              reject(new Error('无法加载' + (kind === 'style' ? '界面样式' : '交互脚本') + '（' + filename + '）。'));
+              return;
+            }
+            const url = new URL(filename, bases[index]);
+            url.searchParams.set('v', version);
+            const node = document.createElement(kind === 'style' ? 'link' : 'script');
+            let runtimeError = '';
+            const recordError = (event) => {
+              if (event.filename === url.href) runtimeError = event.message || '脚本初始化失败';
+            };
+            const cleanup = () => window.removeEventListener('error', recordError);
+            if (kind === 'style') { node.rel = 'stylesheet'; node.href = url.href; }
+            else { node.src = url.href; window.addEventListener('error', recordError); }
+            node.onload = () => {
+              cleanup();
+              if (runtimeError) {
+                // 已执行的脚本不再重载，避免重复绑定事件。
+                reject(new Error('交互脚本初始化失败，请重新加载页面。'));
+              } else if (kind === 'style' && getComputedStyle(document.querySelector('.studio-shell')).display !== 'grid') {
+                node.remove(); attempt(index + 1);
+              } else resolve(new URL('./', url));
+            };
+            node.onerror = () => { cleanup(); node.remove(); attempt(index + 1); };
+            document.head.append(node);
+          }
+          attempt(0);
+        });
+      }
+
+      async function start() {
+        try {
+          const assetBase = await loadAsset('style', 'styles.css');
+          // 跟随实际成功加载的样式目录，文件预览和服务入口均能找到插画。
+          const scene = document.getElementById('welcome-scene');
+          scene.src = new URL('assets/mellow-scene.svg?v=' + version, assetBase).href;
+          scene.addEventListener('error', () => { scene.closest('figure').hidden = true; }, { once: true });
+          await loadAsset('script', 'app.js');
+          document.documentElement.removeAttribute('data-ui-loading');
+          document.getElementById('page-load-state').hidden = true;
+        } catch (error) {
+          document.querySelector('.studio-shell').hidden = true;
+          document.getElementById('page-load-title').textContent = '页面没有完整打开';
+          document.getElementById('page-load-detail').textContent = error.message + ' 请先运行 uv run web_main.py，再通过终端显示的地址打开工作空间。';
+          document.getElementById('open-workspace').hidden = false;
+          document.getElementById('retry-page').hidden = false;
+        }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+      else start();
+    })();
+  </script>
+</head>
+<body data-phase="offline">
+  <div id="page-load-state" role="status">
+    <h1 id="page-load-title">正在打开 Mellow…</h1>
+    <p id="page-load-detail">正在准备你的工作空间。</p>
+    <a id="open-workspace" href="http://127.0.0.1:8765/" hidden>打开本地工作空间 ↗</a>
+    <button id="retry-page" type="button" onclick="location.reload()" hidden>重新加载</button>
+    <noscript><p>请启用 JavaScript，再打开 <a href="http://127.0.0.1:8765/">本地工作空间</a>。</p></noscript>
+  </div>
+  <a class="skip-link" href="#prompt-input">跳到需求输入</a>
+  <div class="studio-shell">
+    <header class="studio-topbar">
+      <a class="studio-brand" href="/" aria-label="Mellow 首页">
+        <span class="studio-mark" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="7" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 2v3m0 22v3M2 16h3m22 0h3M6.1 6.1l2.1 2.1m15.6 15.6 2.1 2.1M6.1 25.9l2.1-2.1M23.8 8.2l2.1-2.1"/></g><path d="M12.5 16.5c1.8 2.2 5.2 2.2 7 0" stroke="#fff7e9" stroke-width="1.1" stroke-linecap="round"/></svg></span>
+        <strong>Mellow</strong><span class="studio-wordmark">想法，慢慢成形</span>
+      </a>
+      <div class="work-switch">
+        <label for="work-select">本次作品</label>
+        <select id="work-select" aria-label="查看本次不同任务的成果" disabled>
+          <option value="">还没有作品</option>
+        </select>
+      </div>
+      <div class="studio-top-actions">
+        <a class="quiet-button" id="workspace-files" href="/files" target="_blank" rel="noopener" hidden>我的文件 ↗</a>
+        <form id="logout-form" action="/auth/logout" method="post" hidden><button class="quiet-button" type="submit">退出</button></form>
+        <span class="connection-status" id="connection-status" data-state="connecting"><span aria-hidden="true"></span><span id="connection-label">正在连接</span></span>
+        <button class="new-work-button" id="new-chat" type="button" title="开启新会话，开始一份新作品" disabled>
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="new-work-label">新作品</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="studio-main">
+      <section class="work-heading" aria-label="当前作品">
+        <div class="work-heading-copy">
+          <p class="eyebrow">A LITTLE ROOM FOR BIG IDEAS</p>
+          <h1 id="page-title">今天，想让什么好事发生？</h1>
+          <p id="session-detail">从一个小小的想法开始，我们一起把它做好。</p>
+        </div>
+        <button class="quiet-button" id="activity-toggle" type="button" aria-controls="history-view" aria-label="查看任务经过">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 5h12M4 10h8M4 15h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="15" cy="14" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M15 12.6v1.7l1 .6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg><span>看看经过</span>
+        </button>
+      </section>
+
+      <div class="connection-notice" id="connection-notice" role="status" hidden>
+        <span id="connection-notice-text">连接已断开，重新连接将开启新的会话。</span>
+        <button id="reconnect" type="button">重新连接 <span aria-hidden="true">↗</span></button>
+      </div>
+
+      <section class="command-dock" id="command-dock" aria-label="向作品提出需求">
+        <form class="composer" id="composer-form">
+          <span class="command-symbol" aria-hidden="true">↗</span>
+          <label class="sr-only" for="prompt-input">写下需求或回复当前询问</label>
+          <textarea id="prompt-input" rows="1" maxlength="50000" placeholder="写下一件你想完成的事，或告诉我这份作品还可以怎样调整…" disabled></textarea>
+          <button class="send-button" id="send-button" type="submit" aria-label="提交需求" disabled><span id="send-label">开始创作</span><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 15 15 5M5 5h10v10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <span class="composer-hint" id="composer-hint">Enter 提交 · Shift + Enter 换行</span>
+        </form>
+      </section>
+
+      <div class="canvas-layout">
+        <section class="canvas-board" aria-label="作品与相关资料">
+          <nav class="canvas-tabs" aria-label="查看作品内容">
+            <div class="canvas-tab-list">
+              <button type="button" data-view="output" aria-pressed="true" aria-controls="output-view">作品</button>
+              <button type="button" data-view="history" aria-pressed="false" aria-controls="history-view">任务经过</button>
+              <button type="button" data-view="sources" aria-pressed="false" aria-controls="sources-view">资料与来源</button>
+            </div>
+            <span class="canvas-nav-note">留一点空间，给更好的想法。</span>
+          </nav>
+
+          <div class="canvas-viewport">
+            <section class="canvas-view output-view" id="output-view" aria-label="当前成果">
+              <div class="canvas-scroll" id="canvas-scroll">
+                <div class="paper-layout">
+                <article class="document-paper" aria-labelledby="document-title">
+                  <header class="document-heading">
+                    <div class="document-overline"><span>Mellow / 你的创作小天地</span><span class="document-status" id="document-status">尚未开始</span></div>
+                    <div class="document-title-row">
+                      <h2 id="document-title">一张空白，很多可能。</h2>
+                      <div class="document-actions">
+                        <button class="document-action" id="copy-output" type="button" aria-label="复制作品正文" title="复制作品正文" disabled><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="7" y="7" width="9" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M12 4H5a1 1 0 0 0-1 1v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span>复制</span></button>
+                        <button class="document-action" id="export-output" type="button" aria-label="导出作品为 Markdown" title="导出作品为 Markdown" disabled><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3v9m-3-3 3 3 3-3M4 13v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg><span>导出</span></button>
+                      </div>
+                    </div>
+                  </header>
+
+                  <div class="output-empty" id="output-empty">
+                    <section class="welcome" id="welcome" aria-labelledby="welcome-title">
+                      <figure class="welcome-scene">
+                        <img id="welcome-scene" width="960" height="400" alt="午后海边，散步的人和坐着阅读的人，远处有小屋、灯塔与缓慢飘动的云。" decoding="async">
+                        <figcaption><span class="scene-dot" aria-hidden="true"></span>给灵感一点阳光，也给自己一点时间。</figcaption>
+                      </figure>
+                      <p class="welcome-overline">GOOD THINGS START WITH A LITTLE IDEA</p>
+                      <h3 id="welcome-title">好想法，<br>值得慢慢发生。</h3>
+                      <p class="welcome-description">一场期待的旅行，一份认真准备的资料，一段想说好的话。<br>先告诉我你的想法，我们从这里开始。</p>
+                      <div class="suggestions" aria-label="从一个真实任务开始">
+                        <button class="suggestion" type="button" data-prompt="请根据知识库整理 Bret 的个人简介，突出她的经历和特点。"><span>整理一份资料</span><span aria-hidden="true">↗</span></button>
+                        <button class="suggestion" type="button" data-prompt="帮我制定一份从阿城到北京的旅游攻略。涉及关键安排时，可以先向我确认。"><span>规划一次旅行</span><span aria-hidden="true">↗</span></button>
+                        <button class="suggestion" type="button" data-prompt="帮我给客户写一封说明项目延期的邮件，并保存为草稿。"><span>打磨一段文字</span><span aria-hidden="true">↗</span></button>
+                      </div>
+                      <p class="welcome-caption">小事放心交给我，重要的事我们商量。</p>
+                    </section>
+                  </div>
+
+                  <div class="output-document" id="output-document" aria-live="polite" aria-relevant="additions"></div>
+                  <footer class="document-footer"><span>一起打磨，直到它成为你想要的样子。</span><span id="output-word-count">0 字</span></footer>
+                </article>
+                <aside class="work-brief" aria-label="作品简报">
+                  <details class="brief-details" open>
+                    <summary><span>这次，我们想做什么</span><span class="brief-toggle" aria-hidden="true">＋</span></summary>
+                    <div class="brief-content">
+                      <section class="brief-section"><h2>想做成什么</h2><p id="work-goal">写下一件你想完成的事。</p></section>
+                      <section class="brief-section"><h2>你补充的想法</h2><div id="decision-list" aria-label="用户已补充的信息"></div></section>
+                    </div>
+                  </details>
+                  <div class="brief-footnote"><span aria-hidden="true">✳</span><p>小事交给我，<br>重要的事一起商量。</p></div>
+                  <div class="aside-moment" aria-hidden="true">
+                    <svg width="150" height="116" viewBox="0 0 150 116" fill="none">
+                      <path d="M37 89V39a37 37 0 0 1 74 0v50" fill="#f7d5b6"/>
+                      <path d="M44 86V39a30 30 0 0 1 60 0v47" fill="#e9eee5"/>
+                      <circle class="window-sun" cx="82" cy="32" r="13" fill="#edb66f"/>
+                      <path d="M44 70c17-18 37-16 60-5v21H44Z" fill="#a5b9aa"/>
+                      <path d="M44 78c22-12 43-9 60-1v9H44Z" fill="#7d9c8b"/>
+                      <path d="M74 10v76M44 48h60" stroke="#fff9ef" stroke-width="4"/>
+                      <path d="M31 89h86" stroke="#c69573" stroke-width="5" stroke-linecap="round"/>
+                      <path d="M100 101h16l3-19H97Z" fill="#c27660"/>
+                      <g class="window-leaves" stroke="#607c69" stroke-width="2" stroke-linecap="round"><path d="M108 84V58m0 13-8-7m8 12 9-12"/><path d="M107 67c-9 0-12-7-9-9 6 0 9 5 9 9Zm2 6c9-1 14-8 11-10-7 0-10 5-11 10Z" fill="#7b977e" stroke="none"/></g>
+                      <path d="m40 100 18-5 17 5v10l-17-4-18 4Z" fill="#f5e3bd" stroke="#d0b996" stroke-linejoin="round"/><path d="M58 96v10" stroke="#d0b996"/>
+                    </svg>
+                    <p>留一小格阳光给自己。</p>
+                  </div>
+                </aside>
+                </div>
+                <button class="scroll-bottom" id="scroll-bottom" type="button" hidden>↓ 查看最新内容</button>
+              </div>
+            </section>
+
+            <section class="canvas-view history-view" id="history-view" aria-label="任务经过" hidden>
+              <div class="history-content" id="activity-panel">
+                <header class="pane-heading"><div><p class="eyebrow">HOW IT COMES TOGETHER</p><h2>每一步，都有迹可循。 <span class="activity-count" id="activity-count">0</span></h2></div><button class="quiet-button" id="activity-close" type="button" aria-label="返回作品"><span aria-hidden="true">←</span> 回到作品</button></header>
+                <div class="pane-empty" id="activity-empty"><span class="empty-line-mark" aria-hidden="true">↗</span><h3>让事情一步步发生。</h3><p>提交需求后，这里会留下真实的工具操作与执行结果。</p></div>
+                <ol class="activity-list" id="activity-list" aria-label="实际工具执行记录"></ol>
+              </div>
+            </section>
+
+            <section class="canvas-view sources-view" id="sources-view" aria-label="资料与来源" hidden>
+              <div class="sources-content">
+                <header class="pane-heading"><div><p class="eyebrow">EVERY IDEA HAS ITS ROOTS</p><h2>这份作品，从何而来。</h2></div></header>
+                <div class="pane-empty" id="sources-empty"><span class="empty-line-mark" aria-hidden="true">⌁</span><h3>好的成果，有所依据。</h3><p>实际检索或引用的资料，会在这里汇集。</p></div>
+                <ul class="sources-list" id="sources-list" aria-label="本次任务的参考资料"></ul>
+              </div>
+            </section>
+          </div>
+        </section>
+
+      </div>
+
+      <section class="decision-panel" id="decision-panel" aria-labelledby="decision-title" hidden>
+        <header class="decision-heading"><div><p class="eyebrow">有一件事，需要你拍板</p><h2 id="decision-title">先听听你的想法。</h2></div><span id="decision-status" role="status">等待你的答复</span></header>
+        <div class="decision-question" id="decision-question"></div>
+        <div class="decision-dock" id="decision-dock"></div>
+      </section>
+    </main>
+
+    <footer class="studio-footer"><div class="studio-task-state"><span class="footer-status-dot" aria-hidden="true"></span><span id="task-status" role="status">等待连接工作空间</span><button id="cancel-task" type="button" hidden>取消当前任务</button></div><span class="footer-note">本地工作空间 · 重要信息请核实</span></footer>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>

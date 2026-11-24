@@ -1,0 +1,22 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.uv-cache/
+.npm-cache/
+.web-workspaces/
+dist/
+.vscode/
+
+# Local backups, private evaluation output and collection scratch data
+.bak*/
+node_modules/
+result/对话记录/
+result/裁判输出/
+result/*.xlsx
+data/travel_collection/candidates_*.json
+data/travel_collection/collection_report_*.json
+data/travel_collection/review_records_*.json

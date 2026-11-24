@@ -1,0 +1,27 @@
+# Render Blueprint：初次部署选择 Free；不会自动购买付费实例。
+services:
+  - type: web
+    name: mellow-agent
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: off
+    healthCheckPath: /health
+    envVars:
+      - key: WEB_ACCESS_PASSWORD
+        sync: false
+      - key: WEB_MAX_CONNECTIONS
+        value: "2"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: OPENAI_MODEL
+        value: deepseek-v4-pro
+      - key: EMBEDDING_BASE_URL
+        sync: false
+      - key: EMBEDDING_KEY
+        sync: false
+      - key: EMBEDDING_MODEL
+        value: BAAI/bge-m3
